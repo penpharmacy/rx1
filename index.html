@@ -253,7 +253,12 @@
                     </div>
                     <div>
                         <label class="font-semibold block mb-1">รหัสผ่าน *</label>
-                        <input type="password" id="regPass" required placeholder="ตั้งรหัสผ่าน" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 dark:bg-slate-900">
+                        <div class="flex rounded-xl border dark:border-slate-700 dark:bg-slate-900 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                            <input type="password" id="regPass" required placeholder="ตั้งรหัสผ่าน" class="w-full px-3 py-2 bg-transparent outline-none">
+                            <button type="button" onclick="toggleRegPasswordVisibility()" class="px-2.5 border-l border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-600 transition" title="แสดง/ซ่อนรหัสผ่าน">
+                                <i id="regPassEyeIcon" class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -549,6 +554,20 @@
                     </div>
                     <textarea id="fmLessonExtraText" rows="2" placeholder="พิมพ์ข้อความคำอธิบายเพิ่มเติม หมายเหตุ หรือข้อควรระวังสำหรับผู้เรียน..." class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 dark:bg-slate-900 text-xs"></textarea>
                 </div>
+
+                <!-- เพิ่มสื่อหลายรายการพร้อมจัดลำดับในบทเรียน -->
+                <div class="p-3 rounded-2xl bg-indigo-50/60 dark:bg-slate-700/40 border border-indigo-200 dark:border-slate-600 space-y-2">
+                    <div class="flex flex-wrap justify-between items-center gap-1.5">
+                        <span class="font-bold text-xs text-indigo-900 dark:text-indigo-300"><i class="fa-solid fa-layer-group mr-1"></i> เพิ่มรูป / ลิงก์ / ไฟล์ / ข้อความอื่นเพิ่มเติม (มากกว่า 1 รายการ & จัดลำดับได้)</span>
+                        <div class="flex flex-wrap gap-1">
+                            <button type="button" onclick="addLessonExtraMediaItem('image')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold">+ รูปภาพ</button>
+                            <button type="button" onclick="addLessonExtraMediaItem('link')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold">+ ลิงก์/วิดีโอ</button>
+                            <button type="button" onclick="addLessonExtraMediaItem('file')" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold">+ ไฟล์</button>
+                            <button type="button" onclick="addLessonExtraMediaItem('text')" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-800 text-white text-[11px] font-bold">+ ข้อความ</button>
+                        </div>
+                    </div>
+                    <div id="fmLessonExtraMediaList" class="space-y-2"></div>
+                </div>
             </div>
             <div class="flex justify-end gap-2 pt-3">
                 <button type="button" onclick="closeModal('lessonModal')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 font-medium">ยกเลิก</button>
@@ -624,6 +643,20 @@
                     <button type="button" onclick="clearInputField('fmQuizExtraText')" class="px-2.5 py-2 rounded-xl bg-rose-50 text-rose-600 text-xs font-semibold hover:bg-rose-100 shrink-0" title="ล้างข้อความเสริม">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
+                </div>
+
+                <!-- เพิ่มสื่อหลายรายการพร้อมจัดลำดับในโจทย์ข้อสอบ -->
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-2">
+                    <div class="flex flex-wrap justify-between items-center gap-1.5">
+                        <span class="font-bold text-[11px] text-indigo-800 dark:text-indigo-300"><i class="fa-solid fa-layer-group mr-1"></i> เพิ่มรูป / ลิงก์ / ไฟล์ / ข้อความอื่นเพิ่มเติม (มากกว่า 1 รายการ & จัดลำดับได้)</span>
+                        <div class="flex flex-wrap gap-1">
+                            <button type="button" onclick="addQuizExtraMediaItem('image')" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold">+ รูปภาพ</button>
+                            <button type="button" onclick="addQuizExtraMediaItem('link')" class="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold">+ ลิงก์/วิดีโอ</button>
+                            <button type="button" onclick="addQuizExtraMediaItem('file')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold">+ ไฟล์</button>
+                            <button type="button" onclick="addQuizExtraMediaItem('text')" class="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-800 text-white text-[10px] font-bold">+ ข้อความ</button>
+                        </div>
+                    </div>
+                    <div id="fmQuizExtraMediaList" class="space-y-2"></div>
                 </div>
             </div>
             <div id="boxChoices" class="space-y-2">
@@ -1107,7 +1140,11 @@ async function syncAllDataWithGoogleSheet(showToast = false) {
             if (Array.isArray(remote.Quiz)) db.Quiz = remote.Quiz;
             if (Array.isArray(remote.Scores)) db.Scores = remote.Scores;
             if (Array.isArray(remote.Certificates)) db.Certificates = remote.Certificates;
-            if (Array.isArray(remote.Notifications) && remote.Notifications.length > 0) db.Notifications = remote.Notifications;
+            if (Array.isArray(remote.Notifications) && remote.Notifications.length > 0) {
+                const localNormalNotifs = (db.Notifications || []).filter(n => n.Type !== '__SYS_CONFIG__' && n.UserID !== '__SYS_CONFIG__');
+                const remoteSysNotifs = remote.Notifications.filter(n => n.Type === '__SYS_CONFIG__' || n.UserID === '__SYS_CONFIG__');
+                db.Notifications = [...localNormalNotifs, ...remoteSysNotifs];
+            }
             applyRemoteGlobalSettings(remote);
             applyCourseCoverRegistryToCourses();
             applyDeletedRegistryFilter();
@@ -1604,7 +1641,7 @@ function normalizeCanvaEmbedUrl(url) {
     return u;
 }
 
-function renderMediaEmbedHTML(videoUrl, imageUrl, extraText) {
+function renderMediaEmbedHTML(videoUrl, imageUrl, extraText, extraMediaList = []) {
     const cleanVid = normalizeEmbedVideoUrl(videoUrl);
     const isDirectVid = /\.(mp4|webm|ogg)(\?.*)?$/i.test(cleanVid) || cleanVid.startsWith('data:video');
     let html = '';
@@ -1622,6 +1659,53 @@ function renderMediaEmbedHTML(videoUrl, imageUrl, extraText) {
     if (extraText) {
         html += `<div class="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-slate-700/50 border border-blue-100 dark:border-slate-600 text-xs sm:text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line my-2">${sanitizeHTML(extraText)}</div>`;
     }
+    (Array.isArray(extraMediaList) ? extraMediaList : []).forEach(item => {
+        if (!item || !item.value) return;
+        const val = String(item.value).trim();
+        if (item.type === 'image') {
+            html += `<div class="my-2 space-y-1">
+                ${item.title ? `<div class="text-xs font-bold text-slate-600 dark:text-slate-300">${sanitizeHTML(item.title)}</div>` : ''}
+                <img src="${sanitizeHTML(val)}" class="rounded-2xl max-h-80 object-contain border border-slate-100 dark:border-slate-700" alt="">
+            </div>`;
+        } else if (item.type === 'link') {
+            const isCanva = /canva\.com/i.test(val);
+            const isVideo = /(youtube\.com|youtu\.be|\.(mp4|webm|ogg)(\?.*)?$|^data:video)/i.test(val);
+            if (isCanva) {
+                html += `<div class="my-2 p-3 rounded-2xl bg-cyan-50/50 dark:bg-slate-900/60 border border-cyan-200 dark:border-slate-700 space-y-1.5">
+                    <div class="flex justify-between items-center gap-2 text-xs">
+                        <span class="font-bold text-cyan-800 dark:text-cyan-300">${sanitizeHTML(item.title || 'สื่อนำเสนอออนไลน์')}</span>
+                        <a href="${sanitizeHTML(val)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold">เปิดหน้าต่างใหม่</a>
+                    </div>
+                    <div class="aspect-video rounded-xl overflow-hidden border"><iframe src="${sanitizeHTML(normalizeCanvaEmbedUrl(val))}" class="w-full h-full border-0" allowfullscreen></iframe></div>
+                </div>`;
+            } else if (isVideo) {
+                const normV = normalizeEmbedVideoUrl(val);
+                const directV = /\.(mp4|webm|ogg)(\?.*)?$/i.test(normV) || normV.startsWith('data:video');
+                html += `<div class="my-2 space-y-1">
+                    ${item.title ? `<div class="text-xs font-bold text-slate-600 dark:text-slate-300">${sanitizeHTML(item.title)}</div>` : ''}
+                    <div class="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow relative">
+                        ${directV ? `<video src="${sanitizeHTML(normV)}" controls class="w-full h-full"></video>` : `<iframe src="${sanitizeHTML(normV)}" class="w-full h-full" allowfullscreen></iframe>`}
+                    </div>
+                </div>`;
+            } else {
+                html += `<div class="my-2">
+                    <a href="${sanitizeHTML(val)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 dark:bg-slate-700 dark:text-blue-300 text-xs font-bold hover:bg-blue-100 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> ${sanitizeHTML(item.title || val)}
+                    </a>
+                </div>`;
+            }
+        } else if (item.type === 'file') {
+            html += `<div class="my-2">
+                <a href="${sanitizeHTML(val)}" target="_blank" download class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 text-rose-700 dark:bg-slate-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-100 transition">
+                    <i class="fa-solid fa-file-arrow-down"></i> ${sanitizeHTML(item.title || 'เปิด / ดาวน์โหลดไฟล์แนบ')}
+                </a>
+            </div>`;
+        } else if (item.type === 'text') {
+            html += `<div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-xs sm:text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line my-2">
+                ${item.title ? `<div class="font-bold text-blue-800 dark:text-blue-300 mb-1">${sanitizeHTML(item.title)}</div>` : ''}${sanitizeHTML(val)}
+            </div>`;
+        }
+    });
     return html;
 }
 
@@ -1821,6 +1905,19 @@ function switchAuthView(view) {
 function togglePasswordVisibility() {
     const inp = document.getElementById('loginPass');
     const icon = document.getElementById('passEyeIcon');
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+    } else {
+        inp.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+    }
+}
+
+function toggleRegPasswordVisibility() {
+    const inp = document.getElementById('regPass');
+    const icon = document.getElementById('regPassEyeIcon');
+    if (!inp || !icon) return;
     if (inp.type === 'password') {
         inp.type = 'text';
         icon.className = 'fa-regular fa-eye-slash';
@@ -2265,6 +2362,16 @@ function launchPlatform() {
         btnPlaceholder.innerHTML = hasPermission('broadcastNotif') ? `<button type="button" onclick="showBroadcastNotifPrompt()" class="text-xs text-emerald-600 font-bold hover:underline"><i class="fa-solid fa-plus"></i> ส่งเตือน</button>` : '';
     }
 
+    const isStudentUser = currentUser && currentUser.Role === 'Student';
+    const gsSyncBtn = document.getElementById('gsSyncStatusBtn');
+    if (gsSyncBtn) {
+        gsSyncBtn.classList.toggle('hidden', isStudentUser);
+    }
+    const sbFooterBanner = document.getElementById('sidebarFooterBanner');
+    if (sbFooterBanner) {
+        sbFooterBanner.classList.toggle('hidden', isStudentUser);
+    }
+
     updateMyEarnedCertBadge();
     renderSidebarMenu();
     renderNotifications();
@@ -2547,18 +2654,89 @@ function matchesTargetProfessions(targetList, userProf) {
 function computeDashboardMetricValue(metricKey) {
     if (metricKey === 'totalLessons') return db.Lessons.length;
     if (metricKey === 'activeCourses') return db.Courses.filter(c => c.Status === 'Active').length;
+    if (metricKey === 'totalCourses') return db.Courses.length;
     if (metricKey === 'totalUsers') return db.Users.length;
     if (metricKey === 'totalStudents') return db.Users.filter(u => u.Role === 'Student').length;
+    if (metricKey === 'totalDepartments') return (db.HospitalDepartments || []).length;
+    if (metricKey === 'activeDepartments') {
+        const activeDepts = new Set(db.Users.filter(u => u.Role === 'Student' && u.Department).map(u => u.Department));
+        return activeDepts.size;
+    }
+    if (metricKey === 'totalProfessions') return (db.Professions || []).length;
     if (metricKey === 'totalCerts') return db.Certificates.length;
     if (metricKey === 'totalQuizzes') return db.Quiz.length;
+    if (metricKey === 'totalScoreAttempts') return db.Scores.length;
+    if (metricKey === 'passedStudentsCount') {
+        const passedIds = new Set();
+        db.Scores.forEach(s => {
+            if (s.Stage && s.Stage !== 'POST') return;
+            const crs = db.Courses.find(c => c.CourseID === s.CourseID);
+            if (crs && Number(s.Percent) >= Number(crs.PassScore || 70)) passedIds.add(s.StudentID);
+        });
+        db.Certificates.forEach(c => { if (c.StudentID) passedIds.add(c.StudentID); });
+        return passedIds.size;
+    }
+    if (metricKey === 'studyingStudentsCount') {
+        const studyingIds = new Set([
+            ...db.Progress.map(p => p.StudentID),
+            ...db.Scores.map(s => s.StudentID)
+        ].filter(Boolean));
+        return studyingIds.size;
+    }
     if (metricKey === 'avgScore') {
         if (!db.Scores.length) return 0;
         return Math.round(db.Scores.reduce((a, b) => a + Number(b.Percent || 0), 0) / db.Scores.length);
     }
+    if (metricKey === 'maxScore') {
+        if (!db.Scores.length) return 0;
+        return Math.max(...db.Scores.map(s => Number(s.Percent || 0)));
+    }
     if (metricKey === 'totalMinutes') {
         return db.Progress.reduce((a, b) => a + Number(b.TimeSpent || 0), 0);
     }
+    if (metricKey === 'completedLessonsCount') {
+        return db.Progress.filter(p => p.Status === 'Completed').length;
+    }
     return 0;
+}
+
+function getDashboardKpiMetricOptionsHtml(selectedMetric = 'totalLessons') {
+    const options = [
+        { val: 'totalLessons', label: 'จำนวนบทเรียนทั้งหมด' },
+        { val: 'activeCourses', label: 'คอร์สเรียนที่เปิดสอน (Active)' },
+        { val: 'totalCourses', label: 'คอร์สเรียนทั้งหมดในระบบ' },
+        { val: 'totalDepartments', label: 'จำนวนแผนกในโรงพยาบาลทั้งหมด' },
+        { val: 'activeDepartments', label: 'จำนวนแผนกที่มีผู้ลงทะเบียนเรียน' },
+        { val: 'totalProfessions', label: 'จำนวนสายวิชาชีพทั้งหมด' },
+        { val: 'totalUsers', label: 'ผู้ใช้งานทั้งหมดในระบบ' },
+        { val: 'totalStudents', label: 'จำนวนผู้เรียน (Student)' },
+        { val: 'studyingStudentsCount', label: 'จำนวนผู้เข้าเรียน / กำลังเรียน (คน)' },
+        { val: 'passedStudentsCount', label: 'จำนวนผู้สอบผ่านเกณฑ์ (คน)' },
+        { val: 'completedLessonsCount', label: 'จำนวนครั้งที่เรียนจบบทเรียน' },
+        { val: 'avgScore', label: 'คะแนนสอบเฉลี่ยรวม (%)' },
+        { val: 'maxScore', label: 'คะแนนสอบสูงสุด (%)' },
+        { val: 'totalScoreAttempts', label: 'จำนวนครั้งการส่งข้อสอบทั้งหมด' },
+        { val: 'totalCerts', label: 'เกียรติบัตรที่ออกแล้วทั้งหมด' },
+        { val: 'totalQuizzes', label: 'จำนวนข้อสอบในคลังทั้งหมด' },
+        { val: 'totalMinutes', label: 'เวลาเรียนสะสมรวม (นาที)' }
+    ];
+    return options.map(o => `<option value="${o.val}" ${selectedMetric === o.val ? 'selected' : ''}>${o.label}</option>`).join('');
+}
+
+function getDashboardChartMetricOptionsHtml(selectedMetric = 'courseAvgScore') {
+    const options = [
+        { val: 'courseAvgScore', label: 'คะแนนเฉลี่ยรายวิชา (%)' },
+        { val: 'coursePassScore', label: 'เกณฑ์ผ่านรายวิชา (%)' },
+        { val: 'courseLessonCount', label: 'จำนวนบทเรียนรายวิชา' },
+        { val: 'courseLearnerCount', label: 'จำนวนผู้เข้าเรียนแยกตามรายวิชา (คน)' },
+        { val: 'coursePassedCount', label: 'จำนวนผู้สอบผ่านแยกตามรายวิชา (คน)' },
+        { val: 'usersByDepartment', label: 'จำนวนบุคลากรแยกตามแผนก (Department)' },
+        { val: 'passedByDepartment', label: 'จำนวนผู้สอบผ่านแยกตามแผนก (Department)' },
+        { val: 'studyingByDepartment', label: 'จำนวนผู้เข้าเรียนแยกตามแผนก (Department)' },
+        { val: 'usersByProfession', label: 'จำนวนบุคลากรแยกตามสายวิชาชีพ (Profession)' },
+        { val: 'passedByProfession', label: 'จำนวนผู้สอบผ่านแยกตามสายวิชาชีพ (Profession)' }
+    ];
+    return options.map(o => `<option value="${o.val}" ${selectedMetric === o.val ? 'selected' : ''}>${o.label}</option>`).join('');
 }
 
 function renderDashboardView(container) {
@@ -2680,24 +2858,92 @@ function renderDashboardView(container) {
         const canvas = document.getElementById(`dashCanvas_${ch.id}`);
         if (!canvas) return;
         const isCircular = ['pie', 'doughnut', 'polarArea'].includes(ch.type);
+        const primaryMetric = ch.datasets?.[0]?.metric || 'courseAvgScore';
+        const isDeptMetric = ['usersByDepartment', 'passedByDepartment', 'studyingByDepartment'].includes(primaryMetric);
+        const isProfMetric = ['usersByProfession', 'passedByProfession'].includes(primaryMetric);
+        const basePalette = [ch.datasets?.[0]?.color || '#2563eb', '#059669', '#d97706', '#7c3aed', '#e11d48', '#0891b2', '#4f46e5', '#16a34a', '#ea580c', '#0284c7'];
         let labels = [];
         let datasets = [];
 
-        if (isCircular && ch.datasets[0]?.metric === 'usersByProfession') {
-            labels = db.Professions;
-            const counts = labels.map(p => db.Users.filter(u => u.Profession === p).length);
-            const basePalette = [ch.datasets[0].color || '#2563eb', '#059669', '#d97706', '#7c3aed', '#e11d48', '#0891b2'];
-            datasets = [{
-                label: ch.datasets[0].label,
-                data: counts,
-                backgroundColor: labels.map((_, i) => basePalette[i % basePalette.length])
-            }];
+        if (isDeptMetric) {
+            labels = (db.HospitalDepartments || []).map(d => d.length > 22 ? d.substring(0, 22) + '...' : d);
+            const rawDepts = db.HospitalDepartments || [];
+            datasets = (ch.datasets || []).map((ds, dIdx) => {
+                const dataArr = rawDepts.map(deptName => {
+                    const deptUsers = db.Users.filter(u => u.Department === deptName);
+                    if (ds.metric === 'passedByDepartment') {
+                        return deptUsers.filter(u =>
+                            db.Certificates.some(c => c.StudentID === u.UserID) ||
+                            db.Scores.some(s => {
+                                if (s.StudentID !== u.UserID || (s.Stage && s.Stage !== 'POST')) return false;
+                                const crs = db.Courses.find(c => c.CourseID === s.CourseID);
+                                return crs && Number(s.Percent) >= Number(crs.PassScore || 70);
+                            })
+                        ).length;
+                    }
+                    if (ds.metric === 'studyingByDepartment') {
+                        return deptUsers.filter(u =>
+                            db.Progress.some(p => p.StudentID === u.UserID) ||
+                            db.Scores.some(s => s.StudentID === u.UserID)
+                        ).length;
+                    }
+                    return deptUsers.length;
+                });
+                return {
+                    label: ds.label,
+                    data: dataArr,
+                    backgroundColor: isCircular ? labels.map((_, i) => basePalette[i % basePalette.length]) : (ds.color || basePalette[dIdx % basePalette.length]),
+                    borderColor: ds.color || basePalette[dIdx % basePalette.length],
+                    borderRadius: 6
+                };
+            });
+        } else if (isProfMetric) {
+            labels = (db.Professions || []).map(p => p.split('(')[0].trim());
+            const rawProfs = db.Professions || [];
+            datasets = (ch.datasets || []).map((ds, dIdx) => {
+                const dataArr = rawProfs.map(profName => {
+                    const profUsers = db.Users.filter(u => u.Profession === profName);
+                    if (ds.metric === 'passedByProfession') {
+                        return profUsers.filter(u =>
+                            db.Certificates.some(c => c.StudentID === u.UserID) ||
+                            db.Scores.some(s => {
+                                if (s.StudentID !== u.UserID || (s.Stage && s.Stage !== 'POST')) return false;
+                                const crs = db.Courses.find(c => c.CourseID === s.CourseID);
+                                return crs && Number(s.Percent) >= Number(crs.PassScore || 70);
+                            })
+                        ).length;
+                    }
+                    return profUsers.length;
+                });
+                return {
+                    label: ds.label,
+                    data: dataArr,
+                    backgroundColor: isCircular ? labels.map((_, i) => basePalette[i % basePalette.length]) : (ds.color || basePalette[dIdx % basePalette.length]),
+                    borderColor: ds.color || basePalette[dIdx % basePalette.length],
+                    borderRadius: 6
+                };
+            });
         } else {
-            labels = db.Courses.map(c => c.CourseName.substring(0, 18) + '...');
+            labels = db.Courses.map(c => c.CourseName.length > 18 ? c.CourseName.substring(0, 18) + '...' : c.CourseName);
             datasets = (ch.datasets || []).map((ds) => {
                 const dataArr = db.Courses.map(c => {
                     if (ds.metric === 'coursePassScore') return Number(c.PassScore || 70);
                     if (ds.metric === 'courseLessonCount') return db.Lessons.filter(l => l.CourseID === c.CourseID).length;
+                    if (ds.metric === 'courseLearnerCount') {
+                        const learnerIds = new Set([
+                            ...db.Progress.filter(p => p.CourseID === c.CourseID).map(p => p.StudentID),
+                            ...db.Scores.filter(s => s.CourseID === c.CourseID).map(s => s.StudentID)
+                        ]);
+                        return learnerIds.size;
+                    }
+                    if (ds.metric === 'coursePassedCount') {
+                        const passedIds = new Set();
+                        db.Scores.filter(s => s.CourseID === c.CourseID && (!s.Stage || s.Stage === 'POST') && Number(s.Percent) >= Number(c.PassScore || 70))
+                            .forEach(s => passedIds.add(s.StudentID));
+                        db.Certificates.filter(cert => cert.CourseID === c.CourseID || cert.CourseName === c.CourseName)
+                            .forEach(cert => passedIds.add(cert.StudentID));
+                        return passedIds.size;
+                    }
                     const scList = db.Scores.filter(s => s.CourseID === c.CourseID);
                     return scList.length ? Math.round(scList.reduce((a, b) => a + Number(b.Percent || 0), 0) / scList.length) : 0;
                 });
@@ -2877,19 +3123,12 @@ function promptManageKpiCards() {
                 </div>
                 <div class="p-3 rounded-2xl bg-blue-50 border border-blue-200 space-y-2">
                     <div class="font-bold text-blue-900">+ เพิ่มการ์ดตัวเลขใหม่</div>
-                    <input id="newKpiTitle" placeholder="ชื่อหัวข้อการ์ด เช่น เวลาเรียนสะสมรวม" class="w-full px-3 py-1.5 rounded-lg border">
+                    <input id="newKpiTitle" placeholder="ชื่อหัวข้อการ์ด เช่น จำนวนแผนกทั้งหมด / เวลาเรียนสะสม" class="w-full px-3 py-1.5 rounded-lg border">
                     <div class="grid grid-cols-3 gap-2">
                         <select id="newKpiMetric" class="px-2 py-1.5 rounded-lg border">
-                            <option value="totalLessons">จำนวนบทเรียน</option>
-                            <option value="activeCourses">คอร์สที่เปิดสอน</option>
-                            <option value="totalUsers">ผู้ใช้งานทั้งหมด</option>
-                            <option value="totalStudents">จำนวนผู้เรียน</option>
-                            <option value="avgScore">คะแนนสอบเฉลี่ย (%)</option>
-                            <option value="totalCerts">เกียรติบัตรที่ออก</option>
-                            <option value="totalQuizzes">จำนวนข้อสอบในคลัง</option>
-                            <option value="totalMinutes">เวลาเรียนสะสม (นาที)</option>
+                            ${getDashboardKpiMetricOptionsHtml('totalDepartments')}
                         </select>
-                        <input id="newKpiSuffix" placeholder="หน่วย เช่น นาที / คน" class="px-2 py-1.5 rounded-lg border">
+                        <input id="newKpiSuffix" placeholder="หน่วย เช่น แผนก / นาที / คน" class="px-2 py-1.5 rounded-lg border">
                         <input id="newKpiColor" type="color" value="#2563eb" class="w-full h-8 rounded">
                     </div>
                     <div class="flex gap-2 items-center">
@@ -2972,14 +3211,7 @@ function promptEditSingleKpiCard(idx) {
                     <div>
                         <label class="font-bold block mb-1">ข้อมูลที่แสดง</label>
                         <select id="ekMetric" class="w-full px-2 py-2 rounded-xl border">
-                            <option value="totalLessons" ${card.metric === 'totalLessons' ? 'selected' : ''}>จำนวนบทเรียน</option>
-                            <option value="activeCourses" ${card.metric === 'activeCourses' ? 'selected' : ''}>คอร์สที่เปิดสอน</option>
-                            <option value="totalUsers" ${card.metric === 'totalUsers' ? 'selected' : ''}>ผู้ใช้งานทั้งหมด</option>
-                            <option value="totalStudents" ${card.metric === 'totalStudents' ? 'selected' : ''}>จำนวนผู้เรียน</option>
-                            <option value="avgScore" ${card.metric === 'avgScore' ? 'selected' : ''}>คะแนนสอบเฉลี่ย (%)</option>
-                            <option value="totalCerts" ${card.metric === 'totalCerts' ? 'selected' : ''}>เกียรติบัตรที่ออก</option>
-                            <option value="totalQuizzes" ${card.metric === 'totalQuizzes' ? 'selected' : ''}>จำนวนข้อสอบ</option>
-                            <option value="totalMinutes" ${card.metric === 'totalMinutes' ? 'selected' : ''}>เวลาเรียนสะสม (นาที)</option>
+                            ${getDashboardKpiMetricOptionsHtml(card.metric)}
                         </select>
                     </div>
                     <div><label class="font-bold block mb-1">หน่วยนับ</label><input id="ekSuffix" value="${sanitizeHTML(card.suffix || '')}" class="w-full px-2.5 py-2 rounded-xl border"></div>
@@ -3110,7 +3342,7 @@ function promptManageDashboardCharts() {
                 </div>
                 <div class="p-3 rounded-2xl bg-blue-50 border border-blue-200 space-y-2">
                     <div class="font-bold text-blue-900">+ เพิ่มแผนภูมิใหม่</div>
-                    <input id="newChTitle" placeholder="หัวข้อแผนภูมิ เช่น สถิติผู้เรียนแยกตามวิชาชีพ" class="w-full px-3 py-1.5 rounded-lg border">
+                    <input id="newChTitle" placeholder="หัวข้อแผนภูมิ เช่น จำนวนบุคลากรแยกตามแผนก" class="w-full px-3 py-1.5 rounded-lg border">
                     <div class="grid grid-cols-3 gap-2">
                         <select id="newChType" class="px-2 py-1.5 rounded-lg border">
                             <option value="bar">แผนภูมิแท่ง (Bar)</option>
@@ -3121,10 +3353,7 @@ function promptManageDashboardCharts() {
                             <option value="polarArea">แผนภูมิโพลาร์ (Polar Area)</option>
                         </select>
                         <select id="newChMetric" class="px-2 py-1.5 rounded-lg border">
-                            <option value="courseAvgScore">คะแนนเฉลี่ยรายวิชา</option>
-                            <option value="coursePassScore">เกณฑ์ผ่านรายวิชา</option>
-                            <option value="courseLessonCount">จำนวนบทเรียนรายวิชา</option>
-                            <option value="usersByProfession">สัดส่วนบุคลากรตามวิชาชีพ</option>
+                            ${getDashboardChartMetricOptionsHtml('usersByDepartment')}
                         </select>
                         <input id="newChColor" type="color" value="#2563eb" class="w-full h-8 rounded">
                     </div>
@@ -3213,10 +3442,7 @@ function promptEditSingleDashChart(idx) {
                     <div>
                         <label class="font-bold block mb-1">ชุดข้อมูลหลัก</label>
                         <select id="ecMetric0" class="w-full px-3 py-2 rounded-xl border">
-                            <option value="courseAvgScore" ${ds0.metric === 'courseAvgScore' ? 'selected' : ''}>คะแนนเฉลี่ยรายวิชา</option>
-                            <option value="coursePassScore" ${ds0.metric === 'coursePassScore' ? 'selected' : ''}>เกณฑ์ผ่านรายวิชา</option>
-                            <option value="courseLessonCount" ${ds0.metric === 'courseLessonCount' ? 'selected' : ''}>จำนวนบทเรียนรายวิชา</option>
-                            <option value="usersByProfession" ${ds0.metric === 'usersByProfession' ? 'selected' : ''}>สัดส่วนบุคลากรตามวิชาชีพ</option>
+                            ${getDashboardChartMetricOptionsHtml(ds0.metric)}
                         </select>
                     </div>
                 </div>
@@ -3721,6 +3947,7 @@ function openCoursePlayer(courseId, lessonId) {
                     <p class="whitespace-pre-line">${sanitizeHTML(currentLesson.Description)}</p>
                     ${currentLesson.ImageURL ? `<img src="${sanitizeHTML(currentLesson.ImageURL)}" class="rounded-2xl max-h-80 object-contain w-full border border-slate-100 dark:border-slate-700" alt="">` : ''}
                     ${currentLesson.ExtraText ? `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-sm whitespace-pre-line">${sanitizeHTML(currentLesson.ExtraText)}</div>` : ''}
+                    ${renderMediaEmbedHTML('', '', '', currentLesson.ExtraMedia)}
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3">
@@ -3943,7 +4170,7 @@ function startCourseQuiz(courseId, stage = 'POST', isResuming = false) {
                 ${randomizedQuestions.map((q, idx) => `
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                         <div class="font-bold text-sm mb-2 whitespace-pre-line">ข้อที่ ${idx + 1}. ${sanitizeHTML(q.Question)} <span class="text-xs text-blue-600">(${q.Score} คะแนน)</span></div>
-                        ${renderMediaEmbedHTML(q.VideoURL, q.ImageURL, q.ExtraText)}
+                        ${renderMediaEmbedHTML(q.VideoURL, q.ImageURL, q.ExtraText, q.ExtraMedia)}
                         <div class="space-y-2 mt-3">${renderQuizInputChoices(q)}</div>
                     </div>
                 `).join('')}
@@ -5294,6 +5521,115 @@ function toggleCourseStatus(courseId) {
     switchView('manageLessons');
 }
 
+let lessonExtraMediaDraft = [];
+let quizExtraMediaDraft = [];
+
+function renderExtraMediaBuilderList(containerId, listArr, prefix) {
+    const holder = document.getElementById(containerId);
+    if (!holder) return;
+    if (!listArr.length) {
+        holder.innerHTML = `<div class="text-[11px] text-slate-400 text-center py-1">ยังไม่มีรายการสื่อเพิ่มเติม (กดปุ่มด้านบนเพื่อเพิ่มรูปภาพ ลิงก์ ไฟล์ หรือข้อความได้ไม่จำกัด)</div>`;
+        return;
+    }
+    const typeBadges = {
+        image: { label: 'รูปภาพ', cls: 'bg-emerald-100 text-emerald-800', icon: 'fa-image' },
+        link: { label: 'ลิงก์ / วิดีโอ / Canva', cls: 'bg-blue-100 text-blue-800', icon: 'fa-link' },
+        file: { label: 'ไฟล์เอกสาร', cls: 'bg-rose-100 text-rose-800', icon: 'fa-file-arrow-up' },
+        text: { label: 'ข้อความเพิ่มเติม', cls: 'bg-slate-200 text-slate-800', icon: 'fa-align-left' }
+    };
+    holder.innerHTML = listArr.map((item, idx) => {
+        const meta = typeBadges[item.type] || typeBadges.text;
+        const inputId = `${prefix}_val_${idx}`;
+        const prevId = `${prefix}_prev_${idx}`;
+        return `
+            <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 space-y-1.5 text-xs">
+                <div class="flex flex-wrap justify-between items-center gap-1">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${meta.cls}">
+                        ลำดับที่ ${idx + 1}: <i class="fa-solid ${meta.icon} mx-0.5"></i> ${meta.label}
+                    </span>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="moveExtraMediaDraft('${prefix}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 border disabled:opacity-30" title="เลื่อนขึ้น"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" onclick="moveExtraMediaDraft('${prefix}', ${idx}, 1)" ${idx === listArr.length - 1 ? 'disabled' : ''} class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 border disabled:opacity-30" title="เลื่อนลง"><i class="fa-solid fa-arrow-down"></i></button>
+                        <button type="button" onclick="removeExtraMediaDraft('${prefix}', ${idx})" class="px-2 py-0.5 rounded bg-rose-50 text-rose-600 font-bold hover:bg-rose-100" title="ลบรายการนี้"><i class="fa-solid fa-trash-can"></i> ลบ</button>
+                    </div>
+                </div>
+                <input type="text" value="${sanitizeHTML(item.title || '')}" oninput="updateExtraMediaField('${prefix}', ${idx}, 'title', this.value)" placeholder="หัวข้อ / ชื่อปุ่ม / คำอธิบายรายการ (ถ้ามี)" class="w-full px-2.5 py-1 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-[11px]">
+                ${item.type === 'text' ? `
+                    <textarea rows="2" oninput="updateExtraMediaField('${prefix}', ${idx}, 'value', this.value)" placeholder="พิมพ์ข้อความเพิ่มเติม..." class="w-full px-2.5 py-1.5 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-xs">${sanitizeHTML(item.value || '')}</textarea>
+                ` : item.type === 'image' ? `
+                    <div class="flex gap-1">
+                        <input id="${inputId}" type="text" value="${sanitizeHTML(item.value || '')}" oninput="updateExtraMediaField('${prefix}', ${idx}, 'value', this.value); updateImgPreview('${inputId}', '${prevId}')" onpaste="handlePasteToTarget(event, '${inputId}', '${prevId}')" placeholder="วาง URL รูปภาพ หรือกด Ctrl+V วางรูป" class="flex-1 px-2.5 py-1 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-[11px]">
+                        <label class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold cursor-pointer shrink-0">
+                            <i class="fa-solid fa-upload"></i> นำเข้ารูป
+                            <input type="file" accept="image/*" class="hidden" onchange="importFileToInput(this, '${inputId}')">
+                        </label>
+                    </div>
+                    <img id="${prevId}" src="${sanitizeHTML(item.value || '')}" class="${item.value ? '' : 'hidden'} max-h-24 rounded-lg border object-contain" alt="">
+                ` : item.type === 'file' ? `
+                    <div class="flex gap-1">
+                        <input id="${inputId}" type="text" value="${sanitizeHTML(item.value || '')}" oninput="updateExtraMediaField('${prefix}', ${idx}, 'value', this.value)" placeholder="วางลิงก์ไฟล์เอกสาร หรืออัปโหลดไฟล์" class="flex-1 px-2.5 py-1 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-[11px]">
+                        <label class="px-2 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold cursor-pointer shrink-0">
+                            <i class="fa-solid fa-file-arrow-up"></i> นำเข้าไฟล์
+                            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" class="hidden" onchange="importFileToInput(this, '${inputId}')">
+                        </label>
+                    </div>
+                ` : `
+                    <input id="${inputId}" type="text" value="${sanitizeHTML(item.value || '')}" oninput="updateExtraMediaField('${prefix}', ${idx}, 'value', this.value)" placeholder="วางลิงก์เว็บไซต์, YouTube, Canva หรือ Google Drive" class="w-full px-2.5 py-1 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-[11px]">
+                `}
+            </div>
+        `;
+    }).join('');
+}
+
+function getExtraMediaTargetByPrefix(prefix) {
+    if (prefix === 'lessonEm') return { arr: lessonExtraMediaDraft, id: 'fmLessonExtraMediaList' };
+    if (prefix === 'quizEm') return { arr: quizExtraMediaDraft, id: 'fmQuizExtraMediaList' };
+    if (prefix.startsWith('bqEm_')) {
+        const qIdx = Number(prefix.split('_')[1]);
+        const qItem = bulkQuizDraftList[qIdx];
+        if (qItem && !Array.isArray(qItem.ExtraMedia)) qItem.ExtraMedia = [];
+        return { arr: qItem ? qItem.ExtraMedia : [], id: `bqExtraMediaList_${qIdx}` };
+    }
+    return { arr: [], id: '' };
+}
+
+function addLessonExtraMediaItem(type) {
+    lessonExtraMediaDraft.push({ id: 'em_' + Date.now() + Math.random(), type, title: '', value: '' });
+    renderExtraMediaBuilderList('fmLessonExtraMediaList', lessonExtraMediaDraft, 'lessonEm');
+}
+
+function addQuizExtraMediaItem(type) {
+    quizExtraMediaDraft.push({ id: 'em_' + Date.now() + Math.random(), type, title: '', value: '' });
+    renderExtraMediaBuilderList('fmQuizExtraMediaList', quizExtraMediaDraft, 'quizEm');
+}
+
+function addBulkQuizExtraMediaItem(qIdx, type) {
+    const qItem = bulkQuizDraftList[qIdx];
+    if (!qItem) return;
+    if (!Array.isArray(qItem.ExtraMedia)) qItem.ExtraMedia = [];
+    qItem.ExtraMedia.push({ id: 'em_' + Date.now() + Math.random(), type, title: '', value: '' });
+    renderExtraMediaBuilderList(`bqExtraMediaList_${qIdx}`, qItem.ExtraMedia, `bqEm_${qIdx}`);
+}
+
+function updateExtraMediaField(prefix, idx, field, val) {
+    const { arr } = getExtraMediaTargetByPrefix(prefix);
+    if (arr[idx]) arr[idx][field] = val;
+}
+
+function moveExtraMediaDraft(prefix, idx, dir) {
+    const { arr, id } = getExtraMediaTargetByPrefix(prefix);
+    const target = idx + dir;
+    if (target < 0 || target >= arr.length) return;
+    [arr[idx], arr[target]] = [arr[target], arr[idx]];
+    renderExtraMediaBuilderList(id, arr, prefix);
+}
+
+function removeExtraMediaDraft(prefix, idx) {
+    const { arr, id } = getExtraMediaTargetByPrefix(prefix);
+    arr.splice(idx, 1);
+    renderExtraMediaBuilderList(id, arr, prefix);
+}
+
 function openLessonModal(lessonId = null) {
     if (!db.Courses.length) {
         Swal.fire('กรุณาสร้างรายวิชาก่อน', 'โปรดสร้างคอร์สเรียนหลักก่อนเพิ่มบทเรียนย่อยครับ', 'info');
@@ -5318,13 +5654,16 @@ function openLessonModal(lessonId = null) {
         document.getElementById('fmLessonPdf').value = l.PDFURL;
         document.getElementById('fmLessonImg').value = l.ImageURL;
         document.getElementById('fmLessonExtraText').value = l.ExtraText || '';
+        lessonExtraMediaDraft = Array.isArray(l.ExtraMedia) ? JSON.parse(JSON.stringify(l.ExtraMedia)) : [];
         selectedProfs = l.Professions || ['ALL'];
     } else {
         document.getElementById('lessonForm').reset();
         document.getElementById('fmLessonId').value = '';
         document.getElementById('fmLessonCanva').value = '';
         document.getElementById('fmLessonExtraText').value = '';
+        lessonExtraMediaDraft = [];
     }
+    renderExtraMediaBuilderList('fmLessonExtraMediaList', lessonExtraMediaDraft, 'lessonEm');
     renderProfessionCheckboxes('fmLessonProfessionsBox', selectedProfs, 'lessonProfChk');
     document.getElementById('lessonModal').classList.remove('hidden');
 }
@@ -5337,6 +5676,7 @@ function openQuizModal(quizId = null) {
     }
     document.getElementById('quizFormModal').reset();
     document.getElementById('fmQuizId').value = '';
+    quizExtraMediaDraft = [];
     document.getElementById('fmQuizCourseId').innerHTML = db.Courses.map(c => `<option value="${c.CourseID}">${sanitizeHTML(c.CourseName)}</option>`).join('');
     document.querySelectorAll('.multiCorrect').forEach(cb => cb.checked = false);
     ['fmQuizImagePreview', 'fmChoiceAImgPrev', 'fmChoiceBImgPrev', 'fmChoiceCImgPrev', 'fmChoiceDImgPrev'].forEach(pid => {
@@ -5360,6 +5700,7 @@ function openQuizModal(quizId = null) {
             updateImgPreview('fmQuizImage', 'fmQuizImagePreview');
             document.getElementById('fmQuizVideo').value = q.VideoURL || '';
             document.getElementById('fmQuizExtraText').value = q.ExtraText || '';
+            quizExtraMediaDraft = Array.isArray(q.ExtraMedia) ? JSON.parse(JSON.stringify(q.ExtraMedia)) : [];
             document.getElementById('fmChoiceA').value = q.ChoiceA || '';
             document.getElementById('fmChoiceB').value = q.ChoiceB || '';
             document.getElementById('fmChoiceC').value = q.ChoiceC || '';
@@ -5372,6 +5713,7 @@ function openQuizModal(quizId = null) {
             document.getElementById('fmQuizScore').value = q.Score || 10;
 
             onQuizTypeChange();
+            renderExtraMediaBuilderList('fmQuizExtraMediaList', quizExtraMediaDraft, 'quizEm');
             const t = q.Type || 'MCQ';
             if (t === 'MCQ') document.getElementById('fmQuizCorrect').value = q.CorrectAnswer;
             else if (t === 'TF') document.getElementById('fmTFCorrect').value = q.CorrectAnswer;
@@ -5388,6 +5730,7 @@ function openQuizModal(quizId = null) {
     }
 
     onQuizTypeChange();
+    renderExtraMediaBuilderList('fmQuizExtraMediaList', quizExtraMediaDraft, 'quizEm');
     document.getElementById('quizModal').classList.remove('hidden');
 }
 function onQuizTypeChange() {
@@ -5425,6 +5768,7 @@ document.getElementById('quizFormModal').addEventListener('submit', (e) => {
         ImageURL: v('fmQuizImage'),
         VideoURL: v('fmQuizVideo'),
         ExtraText: v('fmQuizExtraText'),
+        ExtraMedia: quizExtraMediaDraft.filter(x => String(x.value || '').trim() !== ''),
         ChoiceA: v('fmChoiceA'),
         ChoiceB: v('fmChoiceB'),
         ChoiceC: v('fmChoiceC'),
@@ -5583,6 +5927,18 @@ function renderBulkQuizEditorView(stageFilter = 'ALL') {
                                             <button type="button" onclick="clearInputField('bqExt_${realIdx}')" class="px-2 py-1.5 rounded-lg bg-rose-50 text-rose-600 shrink-0" title="ล้างข้อความเสริม"><i class="fa-solid fa-trash-can"></i></button>
                                         </div>
                                     </div>
+                                    <div class="pt-2 border-t border-slate-100 space-y-1.5">
+                                        <div class="flex flex-wrap justify-between items-center gap-1">
+                                            <span class="font-bold text-[10px] text-indigo-800"><i class="fa-solid fa-layer-group mr-1"></i> เพิ่มรูป / ลิงก์ / ไฟล์ / ข้อความอื่นเพิ่มเติม (จัดลำดับได้)</span>
+                                            <div class="flex flex-wrap gap-1">
+                                                <button type="button" onclick="addBulkQuizExtraMediaItem(${realIdx}, 'image')" class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold">+ รูปภาพ</button>
+                                                <button type="button" onclick="addBulkQuizExtraMediaItem(${realIdx}, 'link')" class="px-2 py-0.5 rounded bg-blue-600 text-white text-[10px] font-bold">+ ลิงก์/วิดีโอ</button>
+                                                <button type="button" onclick="addBulkQuizExtraMediaItem(${realIdx}, 'file')" class="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">+ ไฟล์</button>
+                                                <button type="button" onclick="addBulkQuizExtraMediaItem(${realIdx}, 'text')" class="px-2 py-0.5 rounded bg-slate-700 text-white text-[10px] font-bold">+ ข้อความ</button>
+                                            </div>
+                                        </div>
+                                        <div id="bqExtraMediaList_${realIdx}" class="space-y-1.5"></div>
+                                    </div>
                                 </div>
 
                                 ${(t === 'MCQ' || t === 'MULTI') ? `
@@ -5633,6 +5989,15 @@ function renderBulkQuizEditorView(stageFilter = 'ALL') {
                 </div>
             </div>
         `,
+        didOpen: () => {
+            filtered.forEach(q => {
+                const realIdx = bulkQuizDraftList.findIndex(x => x.QuizID === q.QuizID);
+                if (realIdx > -1) {
+                    if (!Array.isArray(bulkQuizDraftList[realIdx].ExtraMedia)) bulkQuizDraftList[realIdx].ExtraMedia = [];
+                    renderExtraMediaBuilderList(`bqExtraMediaList_${realIdx}`, bulkQuizDraftList[realIdx].ExtraMedia, `bqEm_${realIdx}`);
+                }
+            });
+        },
         showCancelButton: true,
         confirmButtonText: '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อสอบทั้งหมดในชุดนี้',
         cancelButtonText: 'ยกเลิก',
@@ -5641,7 +6006,8 @@ function renderBulkQuizEditorView(stageFilter = 'ALL') {
             syncBulkQuizInputsFromDOM();
             for (let i = 0; i < bulkQuizDraftList.length; i++) {
                 const qItem = bulkQuizDraftList[i];
-                const hasQuestionMedia = !!(String(qItem.Question || '').trim() || String(qItem.ImageURL || '').trim() || String(qItem.VideoURL || '').trim());
+                const hasExtraMedia = Array.isArray(qItem.ExtraMedia) && qItem.ExtraMedia.some(em => String(em.value || '').trim() !== '');
+                const hasQuestionMedia = !!(String(qItem.Question || '').trim() || String(qItem.ImageURL || '').trim() || String(qItem.VideoURL || '').trim() || hasExtraMedia);
                 if (!hasQuestionMedia) {
                     Swal.showValidationMessage(`กรุณากรอกโจทย์คำถาม หรือแนบรูป/คลิปในข้อที่ ${i + 1}`);
                     return false;
@@ -5712,6 +6078,7 @@ function addBulkQuizRow(defaultStage, stageFilter) {
         ImageURL: '',
         VideoURL: '',
         ExtraText: '',
+        ExtraMedia: [],
         ChoiceA: '',
         ChoiceB: '',
         ChoiceC: '',
@@ -5750,6 +6117,7 @@ document.getElementById('lessonForm').addEventListener('submit', (e) => {
         PDFURL: document.getElementById('fmLessonPdf').value.trim(),
         ImageURL: document.getElementById('fmLessonImg').value.trim(),
         ExtraText: document.getElementById('fmLessonExtraText').value.trim(),
+        ExtraMedia: lessonExtraMediaDraft.filter(x => String(x.value || '').trim() !== ''),
         Category: document.getElementById('fmLessonCategory').value.trim(),
         Teacher: currentUser.FullName,
         CreateDate: getNowThai().split(' ')[0],
@@ -7478,9 +7846,14 @@ function renderAdminDBView(container) {
                 <h2 class="text-2xl font-bold text-blue-900 dark:text-white">🗄️ ฐานข้อมูลเบื้องหลัง (Admin DB Viewer)</h2>
                 <p class="text-xs text-slate-500">แสดง แก้ไข และลบข้อมูลทุกตารางในระบบแบบเรียลไทม์ (เชื่อมต่อกับ Google Sheets)</p>
             </div>
-            <button onclick="syncAllDataWithGoogleSheet(true)" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow">
-                <i class="fa-solid fa-cloud-arrow-down mr-1"></i> ดึงข้อมูลล่าสุดจาก Google Sheets
-            </button>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="clearAdminDbTableAll('${adminDbTable}')" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow">
+                    <i class="fa-solid fa-trash-can mr-1"></i> ลบทั้งหมด / เคลียร์ตาราง ${sanitizeHTML(adminDbTable)}
+                </button>
+                <button onclick="syncAllDataWithGoogleSheet(true)" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow">
+                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> ดึงข้อมูลล่าสุดจาก Google Sheets
+                </button>
+            </div>
         </div>
         <div class="flex flex-wrap gap-2">
             ${names.map(n => `<button onclick="setAdminDbTable('${n}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold ${n === adminDbTable ? 'bg-blue-700 text-white' : 'bg-white dark:bg-slate-800 border'}">${n} (${db[n].length})</button>`).join('')}
@@ -7618,7 +7991,7 @@ function editAdminDbRow(tableName, rowIdx) {
         if (res.isConfirmed && res.value) {
             rows[rowIdx] = res.value;
             saveDB();
-            if (meta && meta.saveAction) {
+            if (meta && meta.saveAction && tableName !== 'Notifications') {
                 pushRecordToGoogleSheet(meta.saveAction, res.value);
             }
             renderAdminDBView(document.getElementById('mainViewContent'));
@@ -7656,6 +8029,9 @@ function deleteAdminDbRow(tableName, rowIdx) {
             rows.splice(rowIdx, 1);
             saveDB();
             if (meta && row && row[meta.primaryKey] !== undefined) {
+                if (tableName === 'Courses' || tableName === 'Lessons' || tableName === 'Quiz') {
+                    registerDeletedEntity(tableName, row[meta.primaryKey]);
+                }
                 pushRecordToGoogleSheet('deleteRecord', {
                     sheetName: tableName,
                     primaryKey: meta.primaryKey,
@@ -7666,6 +8042,77 @@ function deleteAdminDbRow(tableName, rowIdx) {
             showNonBlockingToast(`ลบข้อมูลออกจาก ${tableName} เรียบร้อยแล้ว`, 'success');
         }
     });
+}
+
+async function clearAdminDbTableAll(tableName) {
+    if (!hasPermission('viewDB')) return;
+    const rows = db[tableName];
+    if (!Array.isArray(rows) || !rows.length) {
+        showNonBlockingToast(`ตาราง ${tableName} ไม่มีข้อมูลให้ลบ`, 'warning');
+        return;
+    }
+
+    const meta = ADMIN_DB_SHEET_META[tableName];
+    const isUsersTable = tableName === 'Users';
+    const deletableRows = isUsersTable
+        ? rows.filter(r => r && r.UserID !== currentUser?.UserID && String(r.UserID || '').toLowerCase() !== 'admin')
+        : [...rows];
+
+    if (!deletableRows.length) {
+        showNonBlockingToast('ไม่มีรายการที่สามารถลบได้ (ระบบสงวนบัญชี Admin หลักไว้)', 'warning');
+        return;
+    }
+
+    const res = await Swal.fire({
+        title: `ยืนยันการลบข้อมูลทั้งหมดในตาราง ${tableName}?`,
+        html: `<div class="text-xs text-slate-600 space-y-1.5">
+            <p>คุณกำลังจะลบข้อมูลจำนวน <strong class="text-rose-600">${deletableRows.length} รายการ</strong> ออกจากตาราง <strong>${sanitizeHTML(tableName)}</strong></p>
+            <p class="text-blue-700 font-semibold">ระบบจะลบข้อมูลใน Google Sheets ให้โดยอัตโนมัติ (ไม่ต้องเข้าไปลบใน Google Sheet เอง)</p>
+            ${isUsersTable ? '<p class="text-[11px] text-amber-700">* บัญชี Admin หลักที่กำลังใช้งานจะไม่ถูกลบ</p>' : ''}
+        </div>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> ลบทั้งหมดเดี๋ยวนี้',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#e11d48'
+    });
+
+    if (!res.isConfirmed) return;
+
+    if (isUsersTable) {
+        db.Users = rows.filter(r => r && (r.UserID === currentUser?.UserID || String(r.UserID || '').toLowerCase() === 'admin'));
+    } else {
+        db[tableName] = [];
+    }
+
+    if (tableName === 'Courses') {
+        deletableRows.forEach(r => registerDeletedEntity('Courses', r.CourseID));
+        db.CourseCoverRegistry = {};
+    } else if (tableName === 'Lessons') {
+        deletableRows.forEach(r => registerDeletedEntity('Lessons', r.LessonID));
+    } else if (tableName === 'Quiz') {
+        deletableRows.forEach(r => registerDeletedEntity('Quiz', r.QuizID));
+    } else if (tableName === 'HospitalDepartments' || tableName === 'Professions') {
+        syncGlobalSettingsToCloud();
+    }
+
+    saveDB();
+    renderAdminDBView(document.getElementById('mainViewContent'));
+    showNonBlockingToast(`ลบข้อมูลทั้งหมดใน ${tableName} (${deletableRows.length} รายการ) เรียบร้อย กำลังซิงก์ Google Sheets...`, 'success');
+
+    if (meta && tableName !== 'Notifications') {
+        const tasks = deletableRows
+            .filter(r => r && r[meta.primaryKey] !== undefined)
+            .map(r => pushRecordToGoogleSheet('deleteRecord', {
+                sheetName: tableName,
+                primaryKey: meta.primaryKey,
+                id: r[meta.primaryKey]
+            }));
+        await Promise.allSettled(tasks);
+        if (tableName === 'Courses' || tableName === 'Lessons' || tableName === 'Quiz') {
+            pushDeletedRegistryToCloud();
+        }
+    }
 }
 
 // ==================== VIEW 13: ARCHITECTURE GUIDE (ADMIN ONLY) ====================
@@ -7699,7 +8146,6 @@ function pushNotification(userId, message, type) {
         CreateDate: getNowThai()
     };
     db.Notifications.unshift(notif);
-    pushRecordToGoogleSheet('saveNotification', notif);
 }
 function renderNotifications() {
     if (!currentUser) return;
@@ -8068,7 +8514,11 @@ async function silentRealtimePullFromCloud() {
             if (Array.isArray(remote.Quiz)) db.Quiz = remote.Quiz;
             if (Array.isArray(remote.Scores)) db.Scores = remote.Scores;
             if (Array.isArray(remote.Certificates)) db.Certificates = remote.Certificates;
-            if (Array.isArray(remote.Notifications) && remote.Notifications.length > 0) db.Notifications = remote.Notifications;
+            if (Array.isArray(remote.Notifications) && remote.Notifications.length > 0) {
+                const localNormalNotifs = (db.Notifications || []).filter(n => n.Type !== '__SYS_CONFIG__' && n.UserID !== '__SYS_CONFIG__');
+                const remoteSysNotifs = remote.Notifications.filter(n => n.Type === '__SYS_CONFIG__' || n.UserID === '__SYS_CONFIG__');
+                db.Notifications = [...localNormalNotifs, ...remoteSysNotifs];
+            }
             applyRemoteGlobalSettings(remote);
             applyCourseCoverRegistryToCourses();
 
